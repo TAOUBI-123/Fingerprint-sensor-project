@@ -1,14 +1,12 @@
 from machine import Pin, SoftI2C, unique_id, PWM
-import time, network, ubinascii, uhashlib
+import time, network, ubinascii
 import ssd1306
 import fingerprint
 from mqtt import MQTTClient # Requires mqtt.py file
+import secrets  
 
-# --- WIFI & MQTT CONFIGURATION ---
-WIFI_SSID = "Abdel"    # <--- CHANGE THIS
-WIFI_PASS = "00000000"    # <--- CHANGE THIS
-MQTT_SERVER = "172.28.40.64"   # <--- CHANGE THIS to your PC's IP (run ipconfig)
-MQTT_TOPIC  = "security/alert"
+# --- CONFIGURATION (Loaded from secrets.py) ---
+MQTT_TOPIC = "security/alert"
 
 # --- HARDWARE CONFIGURATION ---
 led_green = Pin(4, Pin.OUT)
@@ -18,8 +16,6 @@ led_yellow = Pin(18, Pin.OUT)
 led_yellow.value(0)
 pir = Pin(2, Pin.IN)
 setup_button = Pin(0, Pin.IN, Pin.PULL_UP)
-#buzzer = Pin(23, Pin.OUT)  # <--- CHANGED TO GPIO 23
-#buzzer.value(0) # Silent on startup
 
 buzzer = PWM(Pin(23))
 buzzer.duty(0) # Start silent
@@ -39,7 +35,8 @@ def connect_wifi():
     wlan.active(True)
     if not wlan.isconnected():
         print("Connecting to WiFi...", end="")
-        wlan.connect(WIFI_SSID, WIFI_PASS)
+        # USES SECRETS HERE
+        wlan.connect(secrets.WIFI_SSID, secrets.WIFI_PASS)
         timeout = 0
         while not wlan.isconnected():
             time.sleep(0.5)
@@ -55,8 +52,9 @@ def connect_mqtt():
     global client
     try:
         client_id = ubinascii.hexlify(unique_id())
-        print(f">> Connecting to MQTT Broker at {MQTT_SERVER}...")
-        client = MQTTClient(client_id, MQTT_SERVER)
+        # USES SECRETS HERE
+        print(f">> Connecting to MQTT Broker at {secrets.MQTT_SERVER}...")
+        client = MQTTClient(client_id, secrets.MQTT_SERVER)
         client.connect()
         print(">> MQTT Connected to Broker")
         return True
@@ -155,9 +153,10 @@ if in_setup_mode:
     msg("PASSWORD REQUIRED", "Check Terminal ->")
     print("\n--- ENTER SETUP PASSWORD ---")
     time.sleep(1) 
-    password = input("Password: ")
+    password_input = input("Password: ")
     
-    if password == "aaaaaa":
+    # USES SECRETS HERE (No Hashing)
+    if password_input == secrets.SETUP_PASSWORD:
         print(">> Password Accepted.")
         msg("ACCESS GRANTED", "Wiping DB...")
         fp.empty_db()
@@ -198,7 +197,7 @@ while True:
                     
                     # Acceptance Tone
                     buzzer.freq(1500)
-                    buzzer.duty(512) # 50% Duty Cycle for clear sound
+                    buzzer.duty(512) 
                     time.sleep(0.1)
                     buzzer.freq(2500)
                     time.sleep(0.2)
@@ -214,13 +213,10 @@ while True:
                     # Intruder
                     msg("ACCESS DENIED", "Unknown Finger")
                     send_alert("Access Denied: Intruder") # <--- MQTT ALERT
-                    #buzzer.value(1)
-                    buzzer.freq(2000) # 2000 Hz
-                    buzzer.duty(10)  # 50% Volume
+                    buzzer.freq(2000) 
+                    buzzer.duty(10)  
                     led_red.value(1)
                     time.sleep(1)
-                    #buzzer.value(0)
-                    # Turn off
                     buzzer.duty(0)
                     led_red.value(0)
                     msg("MOTION DETECTED", "Scan ID #1...")
