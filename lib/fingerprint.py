@@ -65,7 +65,8 @@ class Fingerprint:
 
     def search(self):
         # Search the database for the finger in buffer 1
-        self.send_packet(0x04, [0x01, 0x00, 0x00, 0x00, 0xA3]) 
+        # Search Buffer 1, Start Page 0, Count 1000 (0x03E8)
+        self.send_packet(0x04, [0x01, 0x00, 0x00, 0x03, 0xE8]) 
         return self.read_packet() == 0x00
 
     def reg_model(self):

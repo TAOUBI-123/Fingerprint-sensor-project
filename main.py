@@ -1,9 +1,9 @@
 from machine import Pin, SoftI2C, unique_id, PWM
 import time, network, ubinascii
-import ssd1306
-import fingerprint
-from mqtt import MQTTClient # Requires mqtt.py file
-import secrets  
+import lib.ssd1306 as ssd1306
+import lib.fingerprint as fingerprint
+from lib.mqtt import MQTTClient # Requires mqtt.py file
+from config import secrets  
 
 # --- CONFIGURATION (Loaded from secrets.py) ---
 MQTT_TOPIC = "security/alert"
