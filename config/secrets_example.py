@@ -1,0 +1,10 @@
+# Rename this file to secrets.py and fill in your details
+
+WIFI_SSID = "YOUR_WIFI_NAME_HERE"
+WIFI_PASS = "YOUR_WIFI_PASSWORD_HERE"
+MQTT_SERVER = "192.168.1.XXX"
+
+PASSWORD_SALT = "RANDOM_STRING_HERE"
+STORED_HASH = b'PUT_HASH_HERE'
+
+ALLOWED_IDS = []
