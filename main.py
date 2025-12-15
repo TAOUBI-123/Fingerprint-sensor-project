@@ -6,7 +6,7 @@ from lib.mqtt import MQTTClient # Requires mqtt.py file
 from config import secrets  
 
 # --- CONFIGURATION (Loaded from secrets.py) ---
-MQTT_TOPIC = "security/alert"
+MQTT_TOPIC = "abdel_project_9Xs9/security/alerts"
 
 # --- HARDWARE CONFIGURATION ---
 led_green = Pin(4, Pin.OUT)
@@ -53,8 +53,9 @@ def connect_mqtt():
     try:
         client_id = ubinascii.hexlify(unique_id())
         # USES SECRETS HERE
-        print(f">> Connecting to MQTT Broker at {secrets.MQTT_SERVER}...")
-        client = MQTTClient(client_id, secrets.MQTT_SERVER)
+        port = getattr(secrets, 'MQTT_PORT', 1883)
+        print(f">> Connecting to MQTT Broker at {secrets.MQTT_SERVER}:{port}...")
+        client = MQTTClient(client_id, secrets.MQTT_SERVER, port=port)
         client.connect()
         print(">> MQTT Connected to Broker")
         return True
