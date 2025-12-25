@@ -42,3 +42,24 @@ The device connects to a local WiFi network and an MQTT Broker to log security e
 * **I2C Bus:** OLED Display (SDA=Pin 21, SCL=Pin 22)
 * **UART:** Fingerprint Sensor (TX=17, RX=16)
 * **GPIO:** PIR (Pin 2), Green LED (4), Red LED (5), Yellow LED (18), Buzzer (23).
+
+## 6. Security Analysis & Auditing (Bus Pirate v4)
+To validate the physical security of this device, a **Bus Pirate v4** is used to perform hardware penetration testing and protocol analysis.
+
+### A. UART Sniffing (Fingerprint Sensor Attack)
+The fingerprint sensor communicates with the MCU via UART (Pins 16/17).
+* **Vulnerability:** A "Man-in-the-Middle" attack.
+* **Method:** The Bus Pirate probes the RX/TX lines.
+* **Goal:** Capture the specific byte sequence sent by the sensor when a fingerprint is *successfully* matched.
+* **Exploit:** An attacker can use the Bus Pirate to **replay** this "Success" packet to the MCU, tricking the system into unlocking without a real finger.
+
+### B. I2C Interception (Data Snooping)
+The OLED display uses the I2C bus (Pins 21/22).
+* **Method:** The Bus Pirate connects to SDA/SCL lines in "I2C Sniffer" mode.
+* **Goal:** Decode the text being sent to the screen.
+* **Exploit:** Even if the screen is covered or broken, an attacker can read the "Setup Password" prompts or internal debug messages invisible to the user.
+
+### C. Setup Mode Brute-Force
+* **Method:** The Bus Pirate acts as a UART bridge (Bitbanging mode) to the setup terminal.
+* **Goal:** Automate the entry of passwords at high speed.
+* **Exploit:** Attempt to brute-force the setup password defined in `secrets.py` to gain administrative control and wipe the database.
