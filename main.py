@@ -7,6 +7,8 @@ from config import secrets
 
 # --- CONFIGURATION (Loaded from secrets.py) ---
 MQTT_TOPIC = "abdel_project_9Xs9/security/alerts"
+TOPIC_DETECTION = "abdel_project_9Xs9/security/detection"
+TOPIC_ACCESS = "abdel_project_9Xs9/security/access"
 
 # --- HARDWARE CONFIGURATION ---
 led_green = Pin(4, Pin.OUT)
@@ -20,9 +22,27 @@ setup_button = Pin(0, Pin.IN, Pin.PULL_UP)
 buzzer = PWM(Pin(23))
 buzzer.duty(0) # Start silent
 
+time.sleep(1) # Wait for power to stabilize on boot
+
 # I2C OLED Display (SDA=21, SCL=22)
 i2c = SoftI2C(scl=Pin(22), sda=Pin(21), freq=100000)
-oled = ssd1306.SSD1306_I2C(128, 64, i2c)
+
+print("Scanning I2C bus...")
+devices = i2c.scan()
+if devices:
+    print("I2C devices found:", [hex(d) for d in devices])
+else:
+    print("No I2C devices found! Check wiring.")
+
+try:
+    oled = ssd1306.SSD1306_I2C(128, 64, i2c)
+except OSError as e:
+    print("OLED init failed. Using dummy display.", e)
+    class DummyOLED:
+        def fill(self, c): pass
+        def text(self, s, x, y, c=1): pass
+        def show(self): pass
+    oled = DummyOLED()
 
 # UART Fingerprint Sensor (TX=17, RX=16)
 fp = fingerprint.Fingerprint(uart_id=2, tx=17, rx=16)
@@ -63,10 +83,10 @@ def connect_mqtt():
         print(">> MQTT Failed:", e)
         return False
 
-def send_alert(msg_text):
+def send_alert(msg_text, topic=MQTT_TOPIC):
     if client:
         try:
-            client.publish(MQTT_TOPIC, msg_text)
+            client.publish(topic, msg_text)
             print(f">> MQTT Sent: {msg_text}")
         except:
             print(">> MQTT Error. Reconnecting...")
@@ -178,8 +198,8 @@ except: pass
 while True:
     if pir.value() == 1:
         print(">> Motion Detected!")
-        msg("MOTION DETECTED", "Scan ID #1...")
-        send_alert("Motion Detected") # <--- MQTT ALERT
+        msg("Welcome", "Scan to enter...")
+        send_alert("Motion Detected", TOPIC_DETECTION) # <--- MQTT ALERT
         led_yellow.value(1)
 
         # Try Wake LED
@@ -194,7 +214,7 @@ while True:
                 if fp.image2tz(1) and fp.search():
                     # Match found
                     msg("ACCESS GRANTED", "Welcome Master")
-                    send_alert("Access Granted") # <--- MQTT ALERT
+                    send_alert("Access Granted", TOPIC_ACCESS) # <--- MQTT ALERT
                     
                     # Acceptance Tone
                     buzzer.freq(1500)
@@ -213,21 +233,22 @@ while True:
                 else:
                     # Intruder
                     msg("ACCESS DENIED", "Unknown Finger")
-                    send_alert("Access Denied: Intruder") # <--- MQTT ALERT
+                    send_alert("Access Denied", TOPIC_ACCESS) # <--- MQTT ALERT
                     buzzer.freq(2000) 
                     buzzer.duty(10)  
                     led_red.value(1)
                     time.sleep(1)
                     buzzer.duty(0)
                     led_red.value(0)
-                    msg("MOTION DETECTED", "Scan ID #1...")
+                    msg("Welcome", "Scan to enter...")
             time.sleep(0.01)
             
         if not access:
             led_yellow.value(0)
-            msg("TIMEOUT", "System Locked")
-            send_alert("Timeout: No Scan") # <--- MQTT ALERT
-            time.sleep(2)
+            msg("System Locked", "Wait ...")
+            send_alert("No Motion Detected", TOPIC_DETECTION) # <--- MQTT ALERT
+            send_alert("No Scan", TOPIC_ACCESS) # <--- MQTT ALERT
+            time.sleep(0.5)
             
         # Try Sleep LED
         try: fp.led_control(False)

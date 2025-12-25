@@ -1,11 +1,10 @@
 [
     {
-        "id": "7553487ee9554d1d",
+        "id": "alert_flow_1",
         "type": "tab",
-        "label": "IOT controll pannel",
+        "label": "Security Alerts",
         "disabled": false,
-        "info": "",
-        "env": []
+        "info": ""
     },
     {
         "id": "5ddfcdf9a95c397c",
@@ -50,7 +49,7 @@
         "id": "3021d6b6f3f5d4d1",
         "type": "mqtt-broker",
         "name": "",
-        "broker": "\tbroker.hivemq.com",
+        "broker": "broker.hivemq.com",
         "port": 1883,
         "clientid": "",
         "autoConnect": true,
@@ -176,641 +175,126 @@
         }
     },
     {
-        "id": "dcb43bb5617bc8ae",
-        "type": "mqtt in",
-        "z": "7553487ee9554d1d",
-        "name": "",
-        "topic": "home/sensors/temperature",
-        "qos": "2",
-        "datatype": "auto-detect",
-        "broker": "3021d6b6f3f5d4d1",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 190,
-        "y": 120,
-        "wires": [
-            [
-                "ca19d3e542fb8c60"
-            ]
-        ]
-    },
-    {
-        "id": "6a1e1b1f4fdcee37",
-        "type": "mqtt in",
-        "z": "7553487ee9554d1d",
-        "name": "",
-        "topic": "home/sensors/humidity",
-        "qos": "2",
-        "datatype": "auto-detect",
-        "broker": "3021d6b6f3f5d4d1",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 180,
-        "y": 180,
-        "wires": [
-            [
-                "ca19d3e542fb8c60"
-            ]
-        ]
-    },
-    {
-        "id": "64d3f24bcf87ebe4",
-        "type": "ui_gauge",
-        "z": "7553487ee9554d1d",
-        "name": "",
-        "group": "5316a93164cdcaab",
-        "order": 2,
-        "width": 6,
-        "height": 5,
-        "gtype": "gage",
-        "title": "Temperature",
-        "label": " °C",
-        "format": "{{value}}",
-        "min": "10",
-        "max": "40",
-        "colors": [
-            "#00b500",
-            "#e6e600",
-            "#ca3838"
-        ],
-        "seg1": "",
-        "seg2": "",
-        "diff": false,
-        "className": "",
-        "x": 670,
-        "y": 40,
-        "wires": []
-    },
-    {
-        "id": "9e83c58454b639ac",
-        "type": "ui_gauge",
-        "z": "7553487ee9554d1d",
-        "name": "",
-        "group": "5316a93164cdcaab",
-        "order": 1,
-        "width": 6,
-        "height": 5,
-        "gtype": "gage",
-        "title": "Humidity",
-        "label": "(%)",
-        "format": "{{value}}",
-        "min": 0,
-        "max": "100",
-        "colors": [
-            "#00b500",
-            "#e6e600",
-            "#ca3838"
-        ],
-        "seg1": "20",
-        "seg2": "60",
-        "diff": false,
-        "className": "",
-        "x": 660,
-        "y": 80,
-        "wires": []
-    },
-    {
-        "id": "ca19d3e542fb8c60",
-        "type": "function",
-        "z": "7553487ee9554d1d",
-        "name": "function 1",
-        "func": "// Tente de convertir la charge utile (payload) en un nombre décimal.\n// La fonction parseFloat() ignore tout caractère non numérique après les chiffres valides.\n// Cela fonctionne pour les chaînes comme \"25.5\" et assure une valeur numérique.\nmsg.payload = parseFloat(msg.payload);\n\n// Retourne le message avec la charge utile convertie.\nreturn msg;\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 400,
-        "y": 140,
-        "wires": [
-            [
-                "64d3f24bcf87ebe4",
-                "9e83c58454b639ac",
-                "9627587a7e888f1c"
-            ]
-        ]
-    },
-    {
-        "id": "0c0ba1a55bcf236e",
-        "type": "ui_switch",
-        "z": "7553487ee9554d1d",
-        "name": "Close the door",
-        "label": "Lock",
-        "tooltip": "",
-        "group": "53d0edbda762feb5",
-        "order": 1,
-        "width": 10,
-        "height": 2,
-        "passthru": true,
-        "decouple": "false",
-        "topic": "topic",
-        "topicType": "msg",
-        "style": "",
-        "onvalue": "true",
-        "onvalueType": "bool",
-        "onicon": "",
-        "oncolor": "RED",
-        "offvalue": "false",
-        "offvalueType": "bool",
-        "officon": "",
-        "offcolor": "Green",
-        "animate": true,
-        "className": "",
-        "x": 600,
-        "y": 500,
-        "wires": [
-            [
-                "5ffa624eac881ab9"
-            ]
-        ]
-    },
-    {
-        "id": "5ffa624eac881ab9",
-        "type": "mqtt out",
-        "z": "7553487ee9554d1d",
-        "name": "",
-        "topic": "home/lock/command",
-        "qos": "1",
-        "retain": "",
-        "respTopic": "",
-        "contentType": "",
-        "userProps": "",
-        "correl": "",
-        "expiry": "",
-        "broker": "3021d6b6f3f5d4d1",
-        "x": 860,
-        "y": 500,
-        "wires": []
-    },
-    {
-        "id": "6506a506e3477d26",
-        "type": "ui_toast",
-        "z": "7553487ee9554d1d",
-        "position": "top right",
-        "displayTime": "3",
-        "highlight": "Green",
-        "sendall": true,
-        "outputs": 0,
-        "ok": "OK",
-        "cancel": "",
-        "raw": false,
-        "className": "",
-        "topic": "",
-        "name": "",
-        "x": 750,
-        "y": 380,
-        "wires": []
-    },
-    {
-        "id": "9627587a7e888f1c",
-        "type": "ui_chart",
-        "z": "7553487ee9554d1d",
-        "name": "",
-        "group": "5316a93164cdcaab",
-        "order": 3,
-        "width": 12,
-        "height": 4,
-        "label": "chart",
-        "chartType": "line",
-        "legend": "false",
-        "xformat": "HH:mm:ss",
-        "interpolate": "linear",
-        "nodata": "",
-        "dot": false,
-        "ymin": "",
-        "ymax": "",
-        "removeOlder": "24",
-        "removeOlderPoints": "",
-        "removeOlderUnit": "3600",
-        "cutout": 0,
-        "useOneColor": false,
-        "useUTC": false,
-        "colors": [
-            "#1f77b4",
-            "#aec7e8",
-            "#ff7f0e",
-            "#2ca02c",
-            "#98df8a",
-            "#d62728",
-            "#ff9896",
-            "#9467bd",
-            "#c5b0d5"
-        ],
-        "outputs": 1,
-        "useDifferentColor": false,
-        "className": "",
-        "x": 650,
-        "y": 120,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "05a44e488b528bb3",
-        "type": "ui_text",
-        "z": "7553487ee9554d1d",
-        "group": "53d0edbda762feb5",
-        "order": 4,
-        "width": 5,
-        "height": 3,
-        "name": "",
-        "label": "Fingerprint status",
-        "format": "{{msg.payload}}",
-        "layout": "row-spread",
-        "className": "",
-        "style": true,
-        "font": "",
-        "fontSize": "20",
-        "color": "#f50f32",
-        "x": 750,
-        "y": 320,
-        "wires": []
-    },
-    {
-        "id": "45ce9b1a0326200a",
-        "type": "mqtt in",
-        "z": "7553487ee9554d1d",
-        "name": "",
-        "topic": "home/security/status",
-        "qos": "2",
-        "datatype": "auto-detect",
-        "broker": "3021d6b6f3f5d4d1",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 230,
-        "y": 380,
-        "wires": [
-            [
-                "62cffbe3901e6fd6",
-                "f2bc2dce587a0528",
-                "7bbf9ec063fa3d57"
-            ]
-        ]
-    },
-    {
-        "id": "62cffbe3901e6fd6",
-        "type": "switch",
-        "z": "7553487ee9554d1d",
-        "name": "",
-        "property": "payload",
-        "propertyType": "msg",
-        "rules": [
-            {
-                "t": "neq",
-                "v": "ACCÈS_REFUSÉ",
-                "vt": "str"
-            }
-        ],
-        "checkall": "true",
-        "repair": false,
-        "outputs": 1,
-        "x": 580,
-        "y": 380,
-        "wires": [
-            [
-                "6506a506e3477d26"
-            ]
-        ]
-    },
-    {
-        "id": "42e19887124a78fe",
-        "type": "mqtt in",
-        "z": "7553487ee9554d1d",
-        "name": "",
-        "topic": "home/lock/state",
-        "qos": "2",
-        "datatype": "auto-detect",
-        "broker": "3021d6b6f3f5d4d1",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 160,
-        "y": 280,
-        "wires": [
-            [
-                "31b8c53ae8708a5c"
-            ]
-        ]
-    },
-    {
-        "id": "f2bc2dce587a0528",
-        "type": "switch",
-        "z": "7553487ee9554d1d",
-        "name": "",
-        "property": "payload",
-        "propertyType": "msg",
-        "rules": [
-            {
-                "t": "neq",
-                "v": "ACCÈS_AUTORISÉ",
-                "vt": "str"
-            }
-        ],
-        "checkall": "true",
-        "repair": false,
-        "outputs": 1,
-        "x": 580,
-        "y": 420,
-        "wires": [
-            [
-                "c41457c78e6799fe"
-            ]
-        ]
-    },
-    {
-        "id": "c41457c78e6799fe",
-        "type": "change",
-        "z": "7553487ee9554d1d",
-        "name": "",
-        "rules": [
-            {
-                "t": "set",
-                "p": "payload",
-                "pt": "msg",
-                "to": "UNLOCK",
-                "tot": "str"
-            }
-        ],
-        "action": "",
-        "property": "",
-        "from": "",
-        "to": "",
-        "reg": false,
-        "x": 810,
-        "y": 440,
-        "wires": [
-            [
-                "5ffa624eac881ab9"
-            ]
-        ]
-    },
-    {
-        "id": "01236affd9a137fd",
-        "type": "mqtt in",
-        "z": "7553487ee9554d1d",
-        "name": "",
-        "topic": "home/security/motion",
-        "qos": "2",
-        "datatype": "auto-detect",
-        "broker": "3021d6b6f3f5d4d1",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 240,
-        "y": 500,
-        "wires": [
-            [
-                "56d87ea127261f67",
-                "ad0fb7f9b302106d"
-            ]
-        ]
-    },
-    {
-        "id": "56d87ea127261f67",
-        "type": "ui_text",
-        "z": "7553487ee9554d1d",
-        "group": "53d0edbda762feb5",
-        "order": 2,
-        "width": 10,
-        "height": 3,
-        "name": "",
-        "label": "Motion Sensor",
-        "format": "{{msg.payload}}",
-        "layout": "row-spread",
-        "className": "",
-        "style": false,
-        "font": "",
-        "fontSize": 16,
-        "color": "#000000",
-        "x": 500,
-        "y": 560,
-        "wires": []
-    },
-    {
-        "id": "ad0fb7f9b302106d",
-        "type": "switch",
-        "z": "7553487ee9554d1d",
-        "name": "",
-        "property": "payload",
-        "propertyType": "msg",
-        "rules": [
-            {
-                "t": "eq",
-                "v": "MOTION_DETECTED",
-                "vt": "str"
-            }
-        ],
-        "checkall": "true",
-        "repair": false,
-        "outputs": 1,
-        "x": 480,
-        "y": 620,
-        "wires": [
-            [
-                "eeaf3dd04c9ec4d0"
-            ]
-        ]
-    },
-    {
-        "id": "eeaf3dd04c9ec4d0",
-        "type": "change",
-        "z": "7553487ee9554d1d",
-        "name": "",
-        "rules": [
-            {
-                "t": "set",
-                "p": "payload",
-                "pt": "msg",
-                "to": "ALERT: MOTION DETECTED!",
-                "tot": "str"
-            }
-        ],
-        "action": "",
-        "property": "",
-        "from": "",
-        "to": "",
-        "reg": false,
-        "x": 670,
-        "y": 620,
-        "wires": [
-            [
-                "9df4263b9cd46b32"
-            ]
-        ]
-    },
-    {
-        "id": "9df4263b9cd46b32",
-        "type": "ui_toast",
-        "z": "7553487ee9554d1d",
-        "position": "top right",
-        "displayTime": "3",
-        "highlight": "",
-        "sendall": true,
-        "outputs": 0,
-        "ok": "OK",
-        "cancel": "",
-        "raw": true,
-        "className": "",
-        "topic": "",
-        "name": "",
-        "x": 910,
-        "y": 660,
-        "wires": []
-    },
-    {
-        "id": "31b8c53ae8708a5c",
-        "type": "ui_template",
-        "z": "7553487ee9554d1d",
-        "group": "53d0edbda762feb5",
-        "name": "Door Staus",
-        "order": 3,
-        "width": 0,
-        "height": 0,
-        "format": "<div ng-bind-html=\"msg.payload\"></div>\n<div style=\"background-color: {{msg.payload == 'UNLOCKED' ? 'red' : 'green'}}; \n           color: white; padding: 5px; text-align: center; border-radius: 5px;\">\n    STATUS: {{msg.payload}}\n</div>",
-        "storeOutMessages": true,
-        "fwdInMessages": true,
-        "resendOnRefresh": true,
-        "templateScope": "local",
-        "className": "",
-        "x": 410,
-        "y": 280,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "b381d3bb619e8a4f",
-        "type": "ui_switch",
-        "z": "7553487ee9554d1d",
-        "name": "",
-        "label": "Green led",
-        "tooltip": "",
-        "group": "53d0edbda762feb5",
-        "order": 4,
-        "width": 0,
-        "height": 0,
-        "passthru": true,
-        "decouple": "false",
-        "topic": "topic",
-        "topicType": "msg",
-        "style": "",
-        "onvalue": "true",
-        "onvalueType": "bool",
-        "onicon": "",
-        "oncolor": "",
-        "offvalue": "false",
-        "offvalueType": "bool",
-        "officon": "",
-        "offcolor": "",
-        "animate": false,
-        "className": "",
-        "x": 680,
-        "y": 720,
-        "wires": [
-            [
-                "3b72fd594509026a"
-            ]
-        ]
-    },
-    {
-        "id": "3b72fd594509026a",
-        "type": "mqtt out",
-        "z": "7553487ee9554d1d",
-        "name": "",
-        "topic": "home/door/led/green",
-        "qos": "0",
-        "retain": "",
-        "respTopic": "",
-        "contentType": "",
-        "userProps": "",
-        "correl": "",
-        "expiry": "",
-        "broker": "3021d6b6f3f5d4d1",
-        "x": 940,
-        "y": 720,
-        "wires": []
-    },
-    {
-        "id": "35f20d21233d2ce5",
-        "type": "ui_button",
-        "z": "7553487ee9554d1d",
-        "name": "",
-        "group": "53d0edbda762feb5",
-        "order": 5,
-        "width": 0,
-        "height": 0,
-        "passthru": false,
-        "label": "Buzzer",
-        "tooltip": "",
-        "color": "",
-        "bgcolor": "",
-        "className": "",
-        "icon": "",
-        "payload": "1",
-        "payloadType": "num",
-        "topic": "topic",
-        "topicType": "msg",
-        "x": 680,
-        "y": 820,
-        "wires": [
-            [
-                "7519dc8fbd2c24bb"
-            ]
-        ]
-    },
-    {
-        "id": "7519dc8fbd2c24bb",
-        "type": "mqtt out",
-        "z": "7553487ee9554d1d",
-        "name": "",
-        "topic": "home/door/buzzer",
-        "qos": "0",
-        "retain": "",
-        "respTopic": "",
-        "contentType": "",
-        "userProps": "",
-        "correl": "",
-        "expiry": "",
-        "broker": "3021d6b6f3f5d4d1",
-        "x": 930,
-        "y": 820,
-        "wires": []
-    },
-    {
-        "id": "7bbf9ec063fa3d57",
-        "type": "function",
-        "z": "7553487ee9554d1d",
-        "name": "function 2",
-        "func": "// Function to parse the raw status JSON and format a message\n\n// 1. Convert the payload string to a JavaScript object\ntry {\n    var status = JSON.parse(msg.payload);\n} catch (e) {\n    // Handle case where payload is not valid JSON\n    node.warn(\"Invalid JSON payload received for status.\");\n    msg.payload = \"Error: Invalid Status Data\";\n    return msg;\n}\n\nvar outputMessage = \"\";\n\n// 2. Check the PIR status\nif (status.pir === true) {\n    outputMessage += \"Motion Triggered\";\n} else {\n    outputMessage += \"No Motion\";\n}\n\n// 3. You can add more checks here, e.g., for buzzer status\n/*\nif (status.buzzer === true) {\n    outputMessage += \" | Alert Active\";\n}\n*/\n\n// 4. Update the message payload with the clean output\nmsg.payload = outputMessage;\n\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 560,
-        "y": 320,
-        "wires": [
-            [
-                "05a44e488b528bb3"
-            ]
-        ]
-    },
-    {
         "id": "7038c45d56487ad5",
         "type": "global-config",
         "env": [],
         "modules": {
             "node-red-dashboard": "3.6.6"
         }
+    },
+    {
+        "id": "b2db5dcaad503de7",
+        "type": "ui_tab",
+        "name": "Home",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "b94556d0f1053844",
+        "type": "ui_group",
+        "name": "Status",
+        "tab": "b2db5dcaad503de7",
+        "order": 1,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "mqtt_alert_in",
+        "type": "mqtt in",
+        "z": "alert_flow_1",
+        "name": "",
+        "topic": "abdel_project_9Xs9/security/alerts",
+        "qos": "1",
+        "datatype": "auto",
+        "broker": "3021d6b6f3f5d4d1",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 220,
+        "y": 160,
+        "wires": [
+            [
+                "debug_alert",
+                "ui_alert_text",
+                "ui_alert_toast"
+            ]
+        ]
+    },
+    {
+        "id": "ui_alert_text",
+        "type": "ui_text",
+        "z": "alert_flow_1",
+        "group": "b94556d0f1053844",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Latest Security Alert",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": "",
+        "color": "#000000",
+        "x": 520,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "ui_alert_toast",
+        "type": "ui_toast",
+        "z": "alert_flow_1",
+        "position": "top right",
+        "displayTime": "5",
+        "highlight": "red",
+        "sendall": true,
+        "outputs": 0,
+        "ok": "OK",
+        "cancel": "",
+        "raw": false,
+        "className": "",
+        "topic": "Security Alert!",
+        "name": "",
+        "x": 510,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "debug_alert",
+        "type": "debug",
+        "z": "alert_flow_1",
+        "name": "View Raw Msg",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 480,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "7455fd20639c2994",
+        "type": "debug",
+        "z": "alert_flow_1",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 480,
+        "y": 40,
+        "wires": []
     }
 ]
