@@ -50,19 +50,18 @@ fp = fingerprint.Fingerprint(uart_id=2, tx=17, rx=16)
 # --- NETWORK FUNCTIONS ---
 client = None
 
-def connect_wifi():
+def connect_wifi(timeout_ms=20000):
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
     if not wlan.isconnected():
         print("Connecting to WiFi...", end="")
         # USES SECRETS HERE
         wlan.connect(secrets.WIFI_SSID, secrets.WIFI_PASS)
-        timeout = 0
+        start_time = time.ticks_ms()
         while not wlan.isconnected():
             time.sleep(0.5)
             print(".", end="")
-            timeout += 1
-            if timeout > 20: # 10s timeout
+            if time.ticks_diff(time.ticks_ms(), start_time) > timeout_ms:
                 print(" Failed!")
                 return False
     print(" Connected! IP:", wlan.ifconfig()[0])
@@ -194,12 +193,14 @@ send_alert("System Armed") # <--- MQTT ALERT
 try: fp.led_control(False)
 except: pass 
 
+
+
 # --- MAIN SECURITY LOOP ---
 while True:
     if pir.value() == 1:
         print(">> Motion Detected!")
         msg("Welcome", "Scan to enter...")
-        send_alert("Motion Detected", TOPIC_DETECTION) # <--- MQTT ALERT
+        send_alert("Motion Detected", TOPIC_DETECTION)
         led_yellow.value(1)
 
         # Try Wake LED
@@ -208,21 +209,20 @@ while True:
         
         start_scan = time.ticks_ms()
         access = False
+        failed_attempts = 0 # <--- [NEW] Reset counter on new motion event
         
+        # Scanning Window (10 seconds)
         while time.ticks_diff(time.ticks_ms(), start_scan) < 10000:
             if fp.get_image():
                 if fp.image2tz(1) and fp.search():
-                    # Match found
+                    # --- MATCH FOUND ---
+                    failed_attempts = 0 # <--- [NEW] Reset counter on success
                     msg("ACCESS GRANTED", "Welcome Master")
-                    send_alert("Access Granted", TOPIC_ACCESS) # <--- MQTT ALERT
+                    send_alert("Access Granted", TOPIC_ACCESS)
                     
                     # Acceptance Tone
-                    buzzer.freq(1500)
-                    buzzer.duty(512) 
-                    time.sleep(0.1)
-                    buzzer.freq(2500)
-                    time.sleep(0.2)
-                    buzzer.duty(0)   # Silence
+                    buzzer.freq(1500); buzzer.duty(512); time.sleep(0.1)
+                    buzzer.freq(2500); time.sleep(0.2); buzzer.duty(0)
                     
                     led_green.value(1)
                     time.sleep(4)
@@ -231,23 +231,51 @@ while True:
                     access = True
                     break
                 else:
-                    # Intruder
+                    # --- NO MATCH (INTRUDER) ---
+                    failed_attempts += 1 # <--- [NEW] Increment failure count
+                    print(f">> Failed Attempt: {failed_attempts}/3")
+
+                    # [NEW] BRUTE FORCE PROTECTION CHECK
+                    if failed_attempts > 3:
+                        print(">> BRUTE FORCE LIMIT REACHED")
+                        msg("SYSTEM LOCKED", "Limit Overpassed")
+                        send_alert("limit overpassed", TOPIC_ACCESS) # <--- MQTT ALERT
+
+                        # 5 Second Lockout with Red LED Flicker
+                        # Loop runs 25 times * 0.2s = 5.0 seconds
+                        for _ in range(25): 
+                            led_red.value(not led_red.value()) # Toggle LED
+                            buzzer.freq(500) # Low tone warning
+                            buzzer.duty(50)
+                            time.sleep(0.1)
+                            buzzer.duty(0)
+                            time.sleep(0.1)
+                        
+                        led_red.value(0)
+                        failed_attempts = 0 # Reset counter after penalty
+                        access = False # Ensure access remains denied
+                        break # Break the scanning loop immediately
+                    
+                    # [Standard Denial Handling] (Only if limit not reached)
                     msg("ACCESS DENIED", "Unknown Finger")
-                    send_alert("Access Denied", TOPIC_ACCESS) # <--- MQTT ALERT
-                    buzzer.freq(2000) 
-                    buzzer.duty(10)  
+                    send_alert("Access Denied", TOPIC_ACCESS)
+                    buzzer.freq(2000); buzzer.duty(10)
                     led_red.value(1)
                     time.sleep(1)
                     buzzer.duty(0)
                     led_red.value(0)
                     msg("Welcome", "Scan to enter...")
+            
             time.sleep(0.01)
             
         if not access:
             led_yellow.value(0)
-            msg("System Locked", "Wait ...")
-            send_alert("No Motion Detected", TOPIC_DETECTION) # <--- MQTT ALERT
-            send_alert("No Scan", TOPIC_ACCESS) # <--- MQTT ALERT
+            # Only show "System Locked" if we didn't just break out from Brute Force
+            if failed_attempts < 3: 
+                msg("System Locked", "Wait ...")
+            
+            send_alert("No Motion Detected", TOPIC_DETECTION)
+            if not access: send_alert("No Scan", TOPIC_ACCESS)
             time.sleep(0.5)
             
         # Try Sleep LED
