@@ -25,7 +25,9 @@ class MQTTClient:
         self.sock.connect(addr)
         if self.ssl:
             import ussl
+            print(">> SSL: Wrapping socket with certificate verification...")
             self.sock = ussl.wrap_socket(self.sock, **self.ssl_params)
+            print(">> SSL: Handshake successful")
         premsg = bytearray(b"\x10\0\0\0\0\0")
         msg = bytearray(b"\x04MQTT\x04\x02\0\0")
         sz = 10 + 2 + len(self.client_id)

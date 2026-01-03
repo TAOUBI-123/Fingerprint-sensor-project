@@ -110,16 +110,25 @@ def connect_wifi(timeout_ms=20000):
 def connect_mqtt():
     global client
     try:
-        client_id = ubinascii.hexlify(unique_id())
+        client_id = ubinascii.hexlify(unique_id()) # Generate unique client ID based on hardware
         # USES SECRETS HERE
-        port = getattr(secrets, 'MQTT_PORT', 8883)
-        ssl_enabled = getattr(secrets, 'MQTT_SSL', True)
-        ssl_params = {'server_hostname': secrets.MQTT_SERVER} if ssl_enabled else {}
+        port = getattr(secrets, 'MQTT_PORT', 8883) # Get MQTT port from secrets (default 8883)
+        ssl_enabled = getattr(secrets, 'MQTT_SSL', True) # Check if SSL/TLS is enabled
+        
+        ssl_params = {} # Initialize SSL parameters dictionary
+        if ssl_enabled:
+            ssl_params['server_hostname'] = secrets.MQTT_SERVER # Set SNI (Server Name Indication)
+            cert_file = getattr(secrets, 'MQTT_CERT', 'hivemq.pem') # Get certificate filename
+            with open('config/' + cert_file, 'rb') as f: # Open certificate file from config folder
+                ssl_params['cadata'] = f.read() # Read certificate data for verification
+            print(f">> SSL: Loaded certificate '{cert_file}' ({len(ssl_params['cadata'])} bytes)")
         print(f">> Connecting to MQTT Broker at {secrets.MQTT_SERVER}:{port}...")
-        client = MQTTClient(client_id, secrets.MQTT_SERVER, port=port, ssl=ssl_enabled, ssl_params=ssl_params)
-        client.cb = mqtt_callback
-        client.connect()
-        client.subscribe(TOPIC_COMMANDS)
+        user = getattr(secrets, 'MQTT_USER', None)
+        password = getattr(secrets, 'MQTT_PASS', None)
+        client = MQTTClient(client_id, secrets.MQTT_SERVER, port=port, user=user, password=password, ssl=ssl_enabled, ssl_params=ssl_params) # Initialize MQTT client
+        client.cb = mqtt_callback # Set the callback function for incoming messages
+        client.connect() # Establish connection to the broker
+        client.subscribe(TOPIC_COMMANDS) # Subscribe to the command topic
         print(">> MQTT Connected to Broker")
         return True
     except Exception as e:
