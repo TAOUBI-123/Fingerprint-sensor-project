@@ -19,7 +19,7 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 220,
+        "x": 260,
         "y": 80,
         "wires": [
             [
@@ -46,7 +46,7 @@
         "fontSize": "",
         "color": "#000000",
         "x": 500,
-        "y": 40,
+        "y": 60,
         "wires": []
     },
     {
@@ -79,7 +79,7 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 210,
+        "x": 250,
         "y": 200,
         "wires": [
             [
@@ -105,8 +105,8 @@
         "font": "",
         "fontSize": "",
         "color": "#000000",
-        "x": 450,
-        "y": 240,
+        "x": 490,
+        "y": 180,
         "wires": []
     },
     {
@@ -122,31 +122,15 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 460,
-        "y": 320,
-        "wires": []
-    },
-    {
-        "id": "70e7d34b53ca8cc9",
-        "type": "debug",
-        "z": "alert_flow_1",
-        "name": "debug 1",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 460,
-        "y": 180,
+        "x": 500,
+        "y": 240,
         "wires": []
     },
     {
         "id": "8e22328af7813ce8",
         "type": "mqtt out",
         "z": "alert_flow_1",
-        "name": "",
+        "name": "Commands",
         "topic": "abdel_project_9Xs9/security/commands",
         "qos": "",
         "retain": "",
@@ -156,8 +140,8 @@
         "correl": "",
         "expiry": "",
         "broker": "3021d6b6f3f5d4d1",
-        "x": 540,
-        "y": 380,
+        "x": 690,
+        "y": 360,
         "wires": []
     },
     {
@@ -180,11 +164,11 @@
         "payloadType": "str",
         "topic": "topic",
         "topicType": "msg",
-        "x": 220,
-        "y": 380,
+        "x": 260,
+        "y": 320,
         "wires": [
             [
-                "8e22328af7813ce8"
+                "6e303f68932179b7"
             ]
         ]
     },
@@ -192,7 +176,7 @@
         "id": "59dcdbe80dfa7f78",
         "type": "ui_switch",
         "z": "alert_flow_1",
-        "name": "",
+        "name": "Panic Mode",
         "label": "Panic Mode",
         "tooltip": "",
         "group": "b94556d0f1053844",
@@ -201,7 +185,7 @@
         "height": 0,
         "passthru": true,
         "decouple": "false",
-        "topic": "abdel_project_9Xs9/security/commands",
+        "topic": "payload",
         "topicType": "msg",
         "style": "",
         "onvalue": "ALARM_ON",
@@ -215,10 +199,10 @@
         "animate": false,
         "className": "",
         "x": 250,
-        "y": 460,
+        "y": 380,
         "wires": [
             [
-                "8e22328af7813ce8"
+                "6e303f68932179b7"
             ]
         ]
     },
@@ -235,8 +219,8 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 260,
-        "y": 540,
+        "x": 240,
+        "y": 480,
         "wires": [
             [
                 "2f8a8e5b167d22fd",
@@ -262,7 +246,7 @@
         "fontSize": "",
         "color": "#000000",
         "x": 490,
-        "y": 500,
+        "y": 440,
         "wires": []
     },
     {
@@ -278,9 +262,29 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 480,
-        "y": 560,
+        "x": 500,
+        "y": 500,
         "wires": []
+    },
+    {
+        "id": "6e303f68932179b7",
+        "type": "function",
+        "z": "alert_flow_1",
+        "name": "javascript_function",
+        "func": "\n// 1. Get the command string from the previous node (e.g., \"OPEN_DOOR\")\nvar command = msg.payload;\n\n// 2. Get current Unix timestamp (Seconds since Jan 1, 1970)\n// Date.now() gives milliseconds, so we divide by 1000 and floor it.\nvar timestamp = Math.floor(Date.now() / 1000);\n\n// 3. Create the JSON object expected by your ESP32\nmsg.payload = {\n    \"cmd\": command,\n    \"ts\": timestamp\n};\n\n// 4. Return the message to the MQTT node\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 490,
+        "y": 360,
+        "wires": [
+            [
+                "8e22328af7813ce8"
+            ]
+        ]
     },
     {
         "id": "3021d6b6f3f5d4d1",
@@ -334,7 +338,7 @@
         "hidden": false
     },
     {
-        "id": "a43e280378d67a85",
+        "id": "f825c350e0b387ae",
         "type": "global-config",
         "env": [],
         "modules": {

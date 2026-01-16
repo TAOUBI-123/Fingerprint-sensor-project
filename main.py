@@ -1,5 +1,5 @@
 from machine import Pin, SoftI2C, unique_id, PWM
-import time, network, ubinascii, sys
+import time, network, ubinascii, sys, ntptime, ujson
 
 # Fix for missing 'ussl' module in newer MicroPython versions
 try:
@@ -63,7 +63,18 @@ panic_mode = False
 def mqtt_callback(topic, msg_in):
     global panic_mode
     print(f">> MQTT Command: {topic} -> {msg_in}")
-    message = msg_in.decode('utf-8')
+    
+    try:
+        payload = ujson.loads(msg_in)
+        message = payload.get("cmd")
+        ts = payload.get("ts")
+        # Validate Timestamp (30s window). ESP32 Epoch (2000) + 946684800 = Unix Epoch (1970)
+        if not ts or abs((time.time() + 946684800) - int(ts)) > 30:
+            print(">> REJECTED: Invalid Timestamp or Replay Detected")
+            return
+    except:
+        print(">> REJECTED: Invalid JSON Format")
+        return
     
     if message == "OPEN_DOOR":
         print(">> Remote Unlock")
@@ -207,6 +218,11 @@ def enroll_master_finger():
 # --- STARTUP SEQUENCE ---
 msg("System Booting", "Connecting Net...")
 if connect_wifi():
+    try:
+        ntptime.settime()
+        print(">> Time synchronized via NTP")
+    except:
+        print(">> NTP Sync Failed")
     connect_mqtt()
     send_alert("System Booted")
 else:
