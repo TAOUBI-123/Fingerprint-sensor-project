@@ -55,6 +55,9 @@ except OSError as e:
 
 # UART Fingerprint Sensor (TX=17, RX=16)
 fp = fingerprint.Fingerprint(uart_id=2, tx=17, rx=16)
+# Ensure sensor LED is OFF immediately after initialization
+try: fp.led_control(False)
+except: pass
 
 # --- NETWORK FUNCTIONS ---
 client = None
@@ -266,10 +269,12 @@ if in_setup_mode:
 msg("SYSTEM ARMED", "Waiting...")
 send_alert("System Armed") # <--- MQTT ALERT
 
-# Try to turn off LED (If supported)
-try: fp.led_control(False)
-except: pass 
 
+
+# Wait for PIR to stabilize (go low) to prevent immediate trigger
+print(">> Waiting for PIR to stabilize...")
+while pir.value() == 0:
+    time.sleep(0.5)
 
 
 # --- MAIN SECURITY LOOP ---
