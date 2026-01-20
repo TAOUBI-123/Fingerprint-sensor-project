@@ -1,6 +1,6 @@
 
 
-# 🔐 ESP32 Biometric Sentinel
+# 🔐 ESP32 Biometric Sensor
 
 A robust IoT security solution built with MicroPython on ESP32. This system combines biometric authentication with motion detection, brute-force protection, and secure real-time remote management via MQTT.
 
