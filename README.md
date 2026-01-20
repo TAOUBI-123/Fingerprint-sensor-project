@@ -1,4 +1,5 @@
 
+
 # 🔐 ESP32 Biometric Sentinel
 
 A robust IoT security solution built with MicroPython on ESP32. This system combines biometric authentication with motion detection, brute-force protection, and secure real-time remote management via MQTT.
@@ -148,4 +149,29 @@ You can control the device remotely by publishing JSON messages to the topic:
 ```json
 {"cmd": "ALARM_OFF"}
 ```
+
+## 📡 MQTT Topics
+
+The device communicates with the broker using the base path: `abdel_project_9Xs9/security/`
+
+| Topic Suffix | Type | Description | Payload Example |
+| :--- | :--- | :--- | :--- |
+| `.../alerts` | 📤 Pub | General system status updates | `"System Booted"`, `"System Armed"` |
+| `.../detection` | 📤 Pub | PIR motion sensor events | `"Motion Detected"`, `"No Motion Detected"` |
+| `.../access` | 📤 Pub | Authentication logs | `"Access Granted"`, `"Access Denied"`, `"limit overpassed"` |
+| `.../door` | 📤 Pub | Physical door lock state | `"OPEN"`, `"CLOSED"` |
+| `.../commands` | 📥 Sub | Remote control inputs | `{"cmd": "OPEN_DOOR", "ts": "1706631000"}` |
+
+## 📦 Dependencies
+
+To run this project, you need to upload the following libraries to the `/lib` directory on your ESP32.
+
+-  **`ssd1306.py`** The standard MicroPython driver for OLED displays.  
+  *(Available in the official MicroPython repository)*
+
+-  **`fingerprint.py`** A MicroPython port of the Adafruit Fingerprint sensor library.  
+  *(Ensure this supports UART communication for AS608/R307 sensors)*
+
+-  **`mqtt.py`** The lightweight MQTT client.  
+  > **Note:** This is typically the standard `umqtt.simple` library. You must rename the file from `simple.py` to `mqtt.py` for the imports in `main.py` to work.
 
