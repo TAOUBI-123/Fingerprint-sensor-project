@@ -273,7 +273,7 @@ send_alert("System Armed") # <--- MQTT ALERT
 
 # Wait for PIR to stabilize (go low) to prevent immediate trigger
 print(">> Waiting for PIR to stabilize...")
-while pir.value() == 0:
+while pir.value() == 1:
     time.sleep(0.5)
 
 
