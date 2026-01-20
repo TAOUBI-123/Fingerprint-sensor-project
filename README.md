@@ -1,5 +1,3 @@
-
-
 # 🔐 ESP32 Biometric Sensor
 
 A robust IoT security solution built with MicroPython on ESP32. This system combines biometric authentication with motion detection, brute-force protection, and secure real-time remote management via MQTT.
@@ -149,6 +147,29 @@ You can control the device remotely by publishing JSON messages to the topic:
 ```json
 {"cmd": "ALARM_OFF"}
 ```
+
+## 📱 Node-RED Dashboard
+
+This project includes a comprehensive Node-RED dashboard for real-time monitoring and remote control of the security system.
+
+![Node-RED Dashboard](assets/dashboard-node-red.png)
+*(Screenshot of the control panel)*
+
+### Features
+* **Live Status Feed:**
+    * **Detection Alert:** Shows the latest motion events (e.g., "Motion Detected").
+    * **Access Alert:** Displays authentication results (e.g., "Access Granted", "Limit Overpassed").
+    * **Door State:** Indicates if the door is currently **OPEN** or **CLOSED**.
+* **Remote Control:**
+    * **REMOTE UNLOCK:** A dedicated button to trigger the door release mechanism remotely.
+    * **Panic Mode:** A toggle switch to instantly activate or deactivate the system's alarm state.
+
+### Setup
+1.  **Install Node-RED:** Ensure you have Node-RED installed locally or on a VPS.
+2.  **Install Dashboard:** In Node-RED, go to "Manage Palette" and install `node-red-dashboard`.
+3.  **Import Flow:** Import the `flows.json` file provided in this repository.
+4.  **Configure MQTT:** Update the MQTT Broker node in the flow to point to your specific broker (e.g., HiveMQ) and port.
+5.  **Deploy:** Click "Deploy" and access the dashboard at `http://<YOUR_IP>:1880/ui`.
 
 ## 📡 MQTT Topics
 
