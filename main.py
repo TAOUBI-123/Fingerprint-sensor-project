@@ -263,6 +263,7 @@ if in_setup_mode:
         time.sleep(1)
         enroll_master_finger()
     else:
+        print(">> Wrong Password.")
         msg("ACCESS DENIED", "Wrong Password")
         time.sleep(4)
 
