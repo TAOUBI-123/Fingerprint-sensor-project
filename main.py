@@ -124,38 +124,56 @@ def connect_wifi(timeout_ms=20000):
 def connect_mqtt():
     global client
     try:
-        client_id = ubinascii.hexlify(unique_id()) # Generate unique client ID based on hardware
-        # USES SECRETS HERE
-        port = getattr(secrets, 'MQTT_PORT', 8883) # Get MQTT port from secrets (default 8883)
-        ssl_enabled = getattr(secrets, 'MQTT_SSL', True) # Check if SSL/TLS is enabled
+        # 1. Use your fixed Thing Name from secrets as the Client ID
+        client_id = secrets.MQTT_CLIENT_ID 
         
-        ssl_params = {} # Initialize SSL parameters dictionary
-        if ssl_enabled:
-            ssl_params['server_hostname'] = secrets.MQTT_SERVER # Set SNI (Server Name Indication)
-            cert_file = getattr(secrets, 'MQTT_CERT', 'hivemq.pem') # Get certificate filename
-            with open('config/' + cert_file, 'rb') as f: # Open certificate file from config folder
-                ssl_params['cadata'] = f.read() # Read certificate data for verification
-            print(f">> SSL: Loaded certificate '{cert_file}' ({len(ssl_params['cadata'])} bytes)")
-        print(f">> Connecting to MQTT Broker at {secrets.MQTT_SERVER}:{port}...")
-        user = getattr(secrets, 'MQTT_USER', None)
-        password = getattr(secrets, 'MQTT_PASS', None)
-        client = MQTTClient(client_id, secrets.MQTT_SERVER, port=port, user=user, password=password, ssl=ssl_enabled, ssl_params=ssl_params) # Initialize MQTT client
-        client.cb = mqtt_callback # Set the callback function for incoming messages
-        client.connect() # Establish connection to the broker
-        client.subscribe(TOPIC_COMMANDS) # Subscribe to the command topic
-        print(">> MQTT Connected to Broker")
+        # 2. Read the AWS Certificates you uploaded to the /certs folder
+        with open(secrets.CERT_FILE, 'rb') as f:
+            cert_data = f.read()
+        with open(secrets.KEY_FILE, 'rb') as f:
+            key_data = f.read()
+            
+        # 3. Configure the Security Parameters (mTLS)
+        ssl_params = {
+            "cert": cert_data,
+            "key": key_data,
+            "server_side": False
+        }
+
+        print(f">> Connecting to AWS IoT Core: {secrets.MQTT_SERVER}...")
+        
+        # 4. Create the Secure Client
+        client = MQTTClient(
+            client_id, 
+            secrets.MQTT_SERVER, 
+            port=secrets.MQTT_PORT, 
+            keepalive=60, 
+            ssl=True, 
+            ssl_params=ssl_params
+        )
+        
+        client.set_callback(mqtt_callback)
+        client.connect()
+        client.subscribe(TOPIC_COMMANDS)
+        print(">> Success: Securely Linked to AWS Cloud")
         return True
     except Exception as e:
-        print(">> MQTT Failed:", e)
+        print(">> AWS Connection Failed:", e)
         return False
 
 def send_alert(msg_text, topic=MQTT_TOPIC):
     if client:
         try:
-            client.publish(topic, msg_text)
-            print(f">> MQTT Sent: {msg_text}")
+            # Package the scan info into JSON so S3 can organize it
+            payload = ujson.dumps({
+                "device": secrets.MQTT_CLIENT_ID,
+                "status": msg_text,
+                "timestamp": time.time()
+            })
+            client.publish(topic, payload)
+            print(f">> Cloud Log Sent: {msg_text}")
         except:
-            print(">> MQTT Error. Reconnecting...")
+            print(">> Cloud Error. Reconnecting...")
             connect_mqtt()
 
 # --- HELPER FUNCTIONS ---
