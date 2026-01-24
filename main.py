@@ -152,9 +152,9 @@ def connect_mqtt():
             ssl_params=ssl_params
         )
         
-        client.set_callback(mqtt_callback)
+        client.cb = mqtt_callback
         client.connect()
-        client.subscribe(TOPIC_COMMANDS)
+        client.subscribe("abdel_project_9Xs9/security/commands")
         print(">> Success: Securely Linked to AWS Cloud")
         return True
     except Exception as e:
